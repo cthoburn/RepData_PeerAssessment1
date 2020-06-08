@@ -8,7 +8,8 @@ output:
 
 ## Loading and preprocessing the data
 Unzip and load the compressed zip file into dataset.  There are 3 columns of data (steps, date, interval)
-```{r}
+
+```r
 dataset <- read.csv(unzip("activity.zip"), 
                     header=T, 
                     colClasses = c(NA, "Date", NA))
@@ -16,7 +17,8 @@ dataset <- read.csv(unzip("activity.zip"),
 
 ## What is mean total number of steps taken per day?
 While there are missing data, we can find the steps per day by excluding the NA entries.
-```{r}
+
+```r
 totalsteps <- tapply(dataset$steps,
                      dataset$interval,
                      sum,
@@ -25,18 +27,23 @@ totalsteps <- tapply(dataset$steps,
 hist(totalsteps,
      main = "Distribution of steps per Day",
      xlab = "Steps per Day")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+```r
 totalsteps_mean = mean(totalsteps)
 totalsteps_median = median(totalsteps)
 ```
 The histogram reveals a distribution that is skewed towards fewer steps per day.  
-The Mean total steps per day is `r totalsteps_mean`.  
-The Median total steps per day is `r totalsteps_median`.  
+The Mean total steps per day is 1981.2777778.  
+The Median total steps per day is 1808.  
 
 ## What is the average daily activity pattern?
 To look at the average daily activity we can make a time series plot of the 5-minute interval and the average number of steps taken averaged across all days.
 
-```{r}
+
+```r
 intervalsteps <- tapply(dataset$steps,
                         dataset$interval,
                         mean,
@@ -47,23 +54,28 @@ plot(names(intervalsteps),
      type = "l",
      xlab = "5 minute time interval",
      ylab = "Mean Total Steps")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+```r
 # get the first occurance of the maximum number of steps
 intervalsteps_max <- names(intervalsteps[match(max(intervalsteps),
                                                intervalsteps)])
-
 ```
 
-The maximum number of steps occurs in: `r intervalsteps_max`.  
+The maximum number of steps occurs in: 835.  
 
 ## Imputing missing values
-```{r}
+
+```r
 missingsteps <- nrow(dataset[is.na(dataset$steps) == TRUE, ])
 ```
-There are `r missingsteps` NA entries for steps.
+There are 2304 NA entries for steps.
 
 Because there mean total steps is very different depending on the time of day it may be more appropriate to impute based on the interval average rather than the daily average.
-``` {r}
+
+```r
 # make a copy of the dataset in a new frame
 imputeddata <- data.frame(dataset)
 
@@ -75,7 +87,8 @@ for (interval in names(intervalsteps)) {
 ```
 Now we can find the steps per day wiuth the imputed values.
 
-```{r}
+
+```r
 intervalimputed <- tapply(imputeddata$steps,
                           imputeddata$date,
                           sum)
@@ -83,21 +96,26 @@ intervalimputed <- tapply(imputeddata$steps,
 hist(intervalimputed,
      main = "Distribution of steps per Day (with imputed data)",
      xlab = "Steps per Day")
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+```r
 totalimputedsteps_mean = mean(intervalimputed)
 totalimputedsteps_median = median(intervalimputed)
 ```
 Using the imputed data:  
 The histogram reveals a distribution that is not skewed to lower step counts and appears more evenly distributed. 
 
-The Mean total steps per day is `r totalimputedsteps_mean`.  
-The Median total steps per day is `r totalimputedsteps_median`.  
+The Mean total steps per day is 1.0766189\times 10^{4}.  
+The Median total steps per day is 1.0766189\times 10^{4}.  
 
 Imputing the missing data (by replacing the NAs with the mean steps for the intervals) resulted in a dataset that is more evenly distributed where the mean and medians are aligned.  This does result in higher mean and median values for the steps per day than the analysis that excluded the missing values.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+
+```r
 library(lattice)
 
 # add a factor based on weekdays
@@ -111,8 +129,9 @@ imputedsteps_category <- aggregate(steps ~ interval + category, data = imputedda
 
 # and graph by each category (weekend or weekday)
 xyplot(steps ~ interval | category, data=imputedsteps_category, type="l", layout=(c(1, 2)), xlab="Interval", ylab="Number of steps")
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 It would appear that ther are differences in the average number of steps for the time intervals split by weekend or weekday.  
 The weekdays have more steps in the earlier intervals and fewer for many of the intervals in the middle of the day.  
